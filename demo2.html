@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SVG wave</title>
+<style type="text/css">
+	body {
+	  background: white;
+	}
+	#svg-area{
+	  background: white;
+	  position: absolute;
+	  bottom: 0;
+	  left: 0;
+	}
+</style>
+</head>
+<body>
+<!-- 可配置：颜色，幅度，频率 -->
+<svg id="svg-area"><path></path><path></path></svg> 
+<script type="text/javascript">
+(function(){
+    // 组件配置
+    var colors = ['rgba(33, 150, 243, 0.4)', 'rgba(33, 150, 243, 0.6)'],
+    	componentWidth = "100%", // 组件宽度，int or 100%(相当于父元素的宽度)
+    	componentHeight = "200";// 组件高度，int or 100%
+    // 波浪配置
+    var width = 400,		// 宽度
+		height = 40,		// 高度
+		deepth = 200,		// 深度
+        speed = 4, 			// 速度
+    	speedOffset = 1,
+    	focus = 0.5, 		// 波峰集中程度 [-1, 1]
+    	offset = -width * 0.8, 	// 不同波浪的差
+		waveCount = 0;  	// 波浪数
+    var x = [0, offset];
+    var cacheData = ["", ""];
+
+    var svgWave = document.querySelector('#svg-area');
+	var paths = svgWave.querySelectorAll('path');
+	var path1 = paths[0], path2 = paths[1];
+
+	// 配置
+	config();
+	var oldFunc = window.onresize;
+	window.onresize = function() {
+		oldFunc && oldFunc();
+		config(true);
+	}
+
+	// 启动
+	requestAnimationFrame(wave);
+
+	function config(resize) {
+		cacheData = ["",""];
+		svgWave.setAttribute('width', componentWidth);
+		svgWave.setAttribute('height', componentHeight);
+		var pxWidth = componentWidth == "100%" ? svgWave.parentNode.clientWidth : componentWidth;
+		waveCount = Math.ceil(pxWidth/width/2) + 1; // + 1是考虑到第二个波浪向左移，需要预留宽度
+		if (resize == true) return;
+		path1.setAttribute('fill', colors[0]);
+		path2.setAttribute('fill', colors[1]);
+
+	}
+
+	function wave() {
+		path1.setAttribute('d', generateData(0));
+		path2.setAttribute('d', generateData(1));
+		x[0] -= speed;
+		x[1] -= (speed + speedOffset);
+		requestAnimationFrame(wave);
+	}
+	// 动态生成path.d
+	function generateData(index) {
+		// 起点
+		// 重置起点形成循环
+		if (x[index] % (width * 2) == 0) {
+			x[index] = 0;
+		}
+		var startX = x[index],
+			startY = height;
+		var start = [startX, startY].join(',');
+
+		if (cacheData[index] == "") {
+			// 波浪 = 贝塞尔曲线组合（正 + 倒）
+    		var c_x1 = width / 4 * (focus + 1),
+    			c_y1 = c_y2 = - height / 2,
+    			c_x2 = width  - c_x1,		
+    			c_x = width,
+    			c_y = 0;
+    		var curvetoUp =  [c_x1, c_y1, c_x2, c_y2, c_x, c_y].join(' ');
+    		c_y1 = c_y2 = height / 2;
+    		var curvetoDown =  [c_x1, c_y1, c_x2, c_y2, c_x, c_y].join(' ');
+    		var curvetoData = "";
+    		for(var i=0; i<waveCount; i++) {
+    			curvetoData = curvetoData + 'c' + curvetoUp + 'c' + curvetoDown;
+    		}
+
+    		// 闭合
+    		var end = 'l0,' + deepth + ' l-' + waveCount * width * 2 + ',0Z'
+    		cacheData[index] = [curvetoData, end].join('');
+		}
+		return ['M', start, cacheData[index]].join('');
+	}
+})();
+</script>
+</body>
+</html>
