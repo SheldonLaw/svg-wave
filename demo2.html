@@ -28,7 +28,7 @@
     var width = 400,		// 宽度
 		height = 40,		// 高度
 		deepth = 200,		// 深度
-        speed = 4, 			// 速度
+        speed = 4, 			// 速度，关键：需要满足 width * 2 % speed == 0，否则波浪无法正常归位
     	speedOffset = 1,
     	focus = 0.5, 		// 波峰集中程度 [-1, 1]
     	offset = -width * 0.8, 	// 不同波浪的差
