@@ -20,6 +20,8 @@
 <svg id="svg-area"><path></path><path></path></svg> 
 <script type="text/javascript">
 (function(){
+    // @TODO: 需要提供stop方法，否则SPA应用中会一直执行wave方法，没有释放。
+
     // 组件配置
     var colors = ['rgba(33, 150, 243, 0.4)', 'rgba(33, 150, 243, 0.6)'],
     	componentWidth = "100%", // 组件宽度，int or 100%(相当于父元素的宽度)
